@@ -149,7 +149,7 @@ if __name__ == '__main__':
     init_logging()
     console = logging.getLogger('ttc')
     console.debug('Starting program')
-    '''while True:
+    while True:
         post_transit_notice('TTCNotices')
-        time.sleep(10)'''
+        time.sleep(10)
 
