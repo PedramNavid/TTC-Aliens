@@ -58,6 +58,9 @@ class Bot():
             
     @staticmethod
     def post(text):
+        if len(status)>140:
+            console.error('Too many characters: ' + status)
+            return
         status = api.PostUpdate(text)
         return status.text
 
@@ -91,8 +94,9 @@ def post_transit_notice(transit_name):
     writer = Bot()
     notice = _get_transit_notice(transit_name)
     if notice:
-        result = writer.post(alienify(notice))
         console.info('Posting Notice. Result: ' + result)
+        result = writer.post(alienify(notice))
+
 
 
 def _get_alien_text(max_length):
@@ -145,7 +149,7 @@ if __name__ == '__main__':
     init_logging()
     console = logging.getLogger('ttc')
     console.debug('Starting program')
-    while True:
+    '''while True:
         post_transit_notice('TTCNotices')
-        time.sleep(10)
+        time.sleep(10)'''
 

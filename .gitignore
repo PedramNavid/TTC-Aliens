@@ -1,1 +1,4 @@
 settings.ini
+log.txt
+lastid.p
+*.pyc
