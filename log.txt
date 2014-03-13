@@ -1,1 +1,0 @@
-09:17:32 INFO Starting new HTTPS connection (1): api.twitter.com
