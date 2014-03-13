@@ -58,7 +58,7 @@ class Bot():
             
     @staticmethod
     def post(text):
-        if len(status)>140:
+        if len(text)>140:
             console.error('Too many characters: ' + status)
             return
         status = api.PostUpdate(text)
