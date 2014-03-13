@@ -13,10 +13,10 @@ def createConfig():
     """
     config = configobj.ConfigObj(unrepr=True)
     config.filename = inifile
-    config['apikey'] = False
-    config['apisecret'] = False
-    config['tokenkey'] = False
-    config['tokensecret'] = False
+    config['apikey'] = ''
+    config['apisecret'] = ''
+    config['tokenkey'] = ''
+    config['tokensecret'] = ''
     config['transitname'] = 'TTCNotices'
     config.write()
 
@@ -32,10 +32,10 @@ def getConfig():
     localDir = os.path.dirname(os.path.realpath(sys.argv[0]))
     if not os.path.exists(localDir+'\\configspec.ini'):
         conf_ini = file(localDir+'\\configspec.ini', 'w')
-        conf_ini.write("apikey = boolean(default=False)\n")
-        conf_ini.write("apisecret = boolean(default=False)\n")
-        conf_ini.write("tokenkey = boolean(default=False)\n")
-        conf_ini.write("tokensecret = boolean(default=False)\n")
+        conf_ini.write("apikey = string(default='')\n")
+        conf_ini.write("apisecret = string(default='')\n")
+        conf_ini.write("tokenkey = string(default='')\n")
+        conf_ini.write("tokensecret = string(default='')\n")
         conf_ini.write("transitname = string(default='')\n")
         conf_ini.close()
 

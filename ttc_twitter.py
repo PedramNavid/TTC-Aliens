@@ -6,12 +6,13 @@ import logging
 import sys
 import time
 import requests.exceptions
+import controller
 
-# TODO: use apikeys file to popualte these
-apikey = ''
-apisecret = ''
-tokenkey = ''
-tokensecret = ''
+config = controller.getConfig()
+apikey = config['apikey']
+apisecret = config['apisecret']
+tokenkey = config['tokenkey']
+tokensecret = config['tokensecret']
 
 api = twitter.Api(consumer_key=apikey, consumer_secret=apisecret,
                   access_token_key=tokenkey,
@@ -28,7 +29,7 @@ def init_logging():
     if not hasattr(sys, 'frozen'):
 
         console = logging.StreamHandler(sys.stderr)
-        console.setLevel(logging.INFO)
+        console.setLevel(logging.DEBUG)
         formatter = logging.Formatter(
             '%(asctime)s %(levelname)s %(message)s',
             '%H:%M:%S',)
@@ -145,3 +146,4 @@ if __name__ == '__main__':
     while True:
         post_transit_notice('TTCNotices')
         time.sleep(10)
+
