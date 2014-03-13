@@ -94,7 +94,7 @@ def post_transit_notice(transit_name):
     writer = Bot()
     notice = _get_transit_notice(transit_name)
     if notice:
-        console.info('Posting Notice. Result: ' + result)
+        console.info('Posting Notice. Result: ' + notice)
         result = writer.post(alienify(notice))
 
 
