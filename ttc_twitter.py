@@ -53,6 +53,8 @@ class Bot():
                 return statuses[0].text, statuses[0].id
         except requests.exceptions.ConnectionError:
             return
+        except twitter.TwitterError:
+            return
             
     @staticmethod
     def post(text):
@@ -122,9 +124,9 @@ def _strip_text(text, sub):
     return text[0:found]
 
 
-def alienify(text, sub="due to", hash_tag=" #TTC", max_length=140, chance=100):
+def alienify(text, sub="due to", hash_tag=" #TTC", max_length=140, chance=50):
     """Randomly alienifies a text if a substring is found in the text. Max_length
-    is 140 by default (twitter limit). Chance is odds of this happening is 1% (1/100).
+    is 140 by default (twitter limit). Chance is odds of this happening is 2% (1/50).
     """
     stripped = _strip_text(text, sub)
     if stripped:
