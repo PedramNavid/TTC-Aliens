@@ -43,7 +43,7 @@ def init_logging():
         datefmt='%H:%M:%S',)
     if not hasattr(sys, 'frozen'):
         console = logging.StreamHandler(sys.stderr)
-        console.setLevel(logging.DEBUG)
+        console.setLevel(logging.INFO)
         formatter = logging.Formatter(
             '%(asctime)s %(levelname)s %(message)s',
             '%H:%M:%S',)
