@@ -8,7 +8,8 @@ import time
 import requests.exceptions
 import controller
 
-config = controller.getConfig()
+config = controller.get_config()
+
 APIKEY = config['apikey']
 APISECRET = config['apisecret']
 TOKENKEY = config['tokenkey']
@@ -27,11 +28,16 @@ ALIEN_PHRASES = ['due to aliens.',
                  'due to a decline in Spirograph activity',
                  'due to Fukushima radiation',
                  'due to extreme fluoridation',
-]
+                 'due to fabricated fraud',
+                 'due to questionable birth certificates',
+                 'due to Rothschilds interference',
+                 'due to geoengineering',
+                 'due to HAARPA',
+                 'due to reptilians',
+                 'due to Russian interference',
+                 'due to vaccination attempts'
 
-api = twitter.Api(consumer_key=APIKEY, consumer_secret=APISECRET,
-                  access_token_key=TOKENKEY,
-                  access_token_secret=TOKENSECRET)
+]
 
 
 def init_logging():
@@ -42,123 +48,156 @@ def init_logging():
         format='%(asctime)s %(levelname)s %(message)s',
         datefmt='%H:%M:%S',)
     if not hasattr(sys, 'frozen'):
-        console = logging.StreamHandler(sys.stderr)
-        console.setLevel(logging.INFO)
+        logger = logging.StreamHandler(sys.stderr)
+        logger.setLevel(logging.DEBUG)
         formatter = logging.Formatter(
             '%(asctime)s %(levelname)s %(message)s',
             '%H:%M:%S',)
-        console.setFormatter(formatter)
-        logging.getLogger('ttc').addHandler(console)
+        logger.setFormatter(formatter)
+        logging.getLogger('ttc').addHandler(logger)
 
 
-class Bot():
+class TwitterBotError(Exception):
+    pass
+
+
+class TwitterInterface():
     """ A simple front-end to the python-twitter API. Can read the latest status, using a since_id
     to only retrieve new updates. Can post status updates and will catch and ignore certain errors.
     Errors should probably be caught and handled elsewhere, but this is how it goes for now
     """
-    def __init__(self, source_name):
-        self.source_name = source_name
+    def __init__(self):
+        self.api = twitter.Api(consumer_key=APIKEY, consumer_secret=APISECRET,
+                  access_token_key=TOKENKEY,
+                  access_token_secret=TOKENSECRET)
 
-    def get_status(self, since=None):
+    def get_status(self, account_name, since=None):
         try:
-            statuses = api.GetUserTimeline(screen_name=self.source_name, since_id=since, count=1)
+            statuses = self.api.GetUserTimeline(screen_name=account_name, since_id=since, count=1)
             if statuses:
                 return statuses[0].text, statuses[0].id
-        except requests.exceptions.ConnectionError:
-            return
-        except twitter.TwitterError:
-            return
+        except requests.exceptions.ConnectionError as e:
+            raise TwitterBotError('Could not connect to Twitter. Received error: ',  e)
+        except twitter.TwitterError as e:
+            raise TwitterBotError('Could not read status. Received error: ', e)
 
-    @staticmethod
-    def post(text):
-        if len(text)>140:
-            console.error('Too many characters: ' + text)
-            return
-        status = api.PostUpdate(text)
+    def post_status(self, text):
+        if len(text)>MAX_LENGTH:
+            logging.error('Too many characters: ' + text)
+            raise TwitterBotError('Too many characters in text. Got %s, should be %s.', len(text), MAX_LENGTH)
+        status = self.api.PostUpdate(text)
         return status.text
 
-
-def _get_transit_notice(source_name):
-    """ Gets the latest tweet from a transit twitter account. Stores ID so that future runs
-     do not tweet the same status twice. This is called from post_transit_notice and should not be used
-     directly
+class Bot():
+    """ Bot integrates front-end behavior with the TwitterInterface. Ensures status updates
+    are not repeated, alienifies texts with the aid of utility functions, etc. This is
+    the main class to call outside this module.
     """
-    reader = Bot(source_name)
-    try:
-        last_id = pickle.load(open("lastid.p", "rb"))
-        console.debug('Last ID Found: ' + str(last_id))
-    except IOError:
-        console.info('No last Transit Tweet ID found. Assuming first run.')
-        last_id = None
-    result = reader.get_status(last_id)
-    if result:
-        transit_status, transit_id = result
-        console.info('Got new status: ' + transit_status + ' WITH ID: ' + str(transit_id))
-        if transit_id != last_id:
-            pickle.dump(transit_id, open("lastid.p", "wb"))
-            return transit_status
-    return None
+    def __init__(self, source_name=SOURCE_NAME, substring=SUBSTRING, maxlength=MAX_LENGTH,
+                 hashtag=HASH_TAG, chance=CHANCE):
+        self.interface = TwitterInterface()
+        self.source_name=source_name
+        self.substring=substring
+        self.maxlength=maxlength
+        self.hashtag=hashtag
+        self.chance=chance
 
 
-def post_transit_notice():
-    """ Gets the latest transit notice for a source twitter account 'transit_name' and
-     posts a new update to authenticated account, with a chance of alienification.
-    """
-    writer = Bot(SOURCE_NAME)
-    notice = _get_transit_notice(SOURCE_NAME)
-    if notice:
-        console.info('Posting Notice. Result: ' + notice)
-        writer.post(alienify(notice))
+    @staticmethod
+    def _strip_text(text, sub):
+        """Strips part of a text if 'sub' is found, otherwise returns None
+        """
+        found = text.find(sub)
+        if found < 3:
+            # Ignore if sub is found at beginning of text, or not found at all
+            return None
+        return text[0:found]
+
+    @staticmethod
+    def _get_shortest_alien_phrase():
+        """ Finds shortest alien phrase
+        """
+        return min([len(x) for x in ALIEN_PHRASES])
 
 
-def _get_alien_text(max_length):
-    """ Picks a random alien phrase, within a defined maximum phrase length.
-    """
-    min_length = min([len(x) for x in ALIEN_PHRASES])
-    if max_length < min_length:
-        console.warn('Tried to alienify but tweet was too long. Skipping this Alien instance.')
-        return None
-    while True:
-        # Pick a random alien phrase
-        alien_str = ALIEN_PHRASES[random.randint(0, len(ALIEN_PHRASES)-1)]
-        if len(alien_str) <= max_length:
-            console.info('Found alien text' + alien_str)
-            return alien_str
+    def _get_alien_text(self, tweet_length):
+        """ Picks a random alien phrase that will fit within a tweet_length
+        """
+        min_length = self._get_shortest_alien_phrase()
+        if tweet_length < min_length:
+            raise TwitterBotError ('Cannot alienify tweet with length: ', tweet_length)
+        while True:
+            # Todo: this can be more efficient. Should trim list before randomizing
+            # Pick a random alien phrase
+            alien_str = ALIEN_PHRASES[random.randint(0, len(ALIEN_PHRASES)-1)]
+            if len(alien_str) <= tweet_length:
+                logging.info('Found alien text' + alien_str)
+                return alien_str
 
 
-def _strip_text(text, sub):
-    """Strips part of a text if 'sub' is found, otherwise returns None
-    """
-    found = text.find(sub)
-    if found < 3:
-        # Ignore if sub is found at beginning of text, or not found at all
-        return None
-    return text[0:found]
+
+    def get_latest(self):
+        """ Gets the latest tweet from a transit twitter account. Stores ID so that future runs
+         do not tweet the same status twice.
+        """
+        try:
+            last_id = pickle.load(open("lastid.p", "rb"))
+            logging.debug('Last ID Found: ' + str(last_id))
+        except IOError:
+            logging.info('No last Transit Tweet ID found. Assuming first run.')
+            last_id = None
+        try:
+            result = self.interface.get_status(self.source_name, last_id)
+            transit_status, transit_id = result
+            logging.info('Got new status: ' + transit_status + ' WITH ID: ' + str(transit_id))
+            if transit_id != last_id:
+                pickle.dump(transit_id, open("lastid.p", "wb"))
+                return transit_status
+        except TwitterBotError as e:
+            logging.error('Error reading latest status: ', e)
 
 
-def alienify(text):
-    """Randomly alienifies a text if a substring is found in the text. Max_length
-    is 140 by default (twitter limit). Chance is odds of this happening is 2% (1/50).
-    """
-    stripped = _strip_text(text, SUBSTRING)
-    if stripped: # returns None if substring not found
-        # Remove text, potentially add aliens
-        alien_random = random.randint(1, CHANCE)
-        if alien_random == 1:
-            console.info('Alien encountered. Attempting to alienify tweet.')
-            phrase_max = MAX_LENGTH - len(stripped) - len(HASH_TAG)
-            console.debug('Looking for valid match for: ' + stripped)
-            phrase = _get_alien_text(phrase_max)
-            if phrase is not None:
-                return stripped + phrase + HASH_TAG
-    return text
+    def post_latest(self):
+        """ Gets the latest transit notice for a source twitter account 'transit_name' and
+         posts a new update to authenticated account, with a chance of alienification.
+        """
+        notice = self.get_latest()
+        if notice:
+            logging.info('Posting Notice. Result: ' + notice)
+            try:
+                self.interface.post_status(self.alienify(notice))
+            except TwitterBotError as e:
+                logging.error('Error posting latest status: ', e )
+
+    def alienify(self, text):
+        """Randomly alienifies a text if a substring is found in the text. Max_length
+        is 140 by default (twitter limit). Chance is odds of this happening is 2% (1/50).
+        """
+        stripped = self._strip_text(text, self.substring)
+        phrase = None
+        if stripped: # returns None if substring not found
+            allowed_max = self.maxlength - (len(stripped) + len(self.hashtag))
+            if allowed_max >= self._get_shortest_alien_phrase():
+                # Remove text, potentially add aliens
+                alien_random = random.randint(1, self.chance)
+                if alien_random == 1:
+                    logging.info('Alien encountered. Attempting to alienify tweet.')
+                    logging.debug('Looking for valid match for: ' + stripped)
+                    try:
+                        phrase = self._get_alien_text(allowed_max)
+                    except TwitterBotError:
+                        logging.warn('Tried to alienify but tweet was too long. Skipping this Alien instance.')
+                    if phrase:
+                        return stripped + phrase + HASH_TAG
+        return text
 
 
 if __name__ == '__main__':
     init_logging()
-    console = logging.getLogger('ttc')
-    console.debug('Starting program')
+    logging = logging.getLogger('ttc')
+    logging.debug('Starting program')
+    bot = Bot()
     while True:
-        post_transit_notice()
+        bot.post_latest()
         time.sleep(10)
 

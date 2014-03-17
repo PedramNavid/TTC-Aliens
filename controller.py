@@ -3,11 +3,12 @@ import os
 import sys
 from validate import Validator
 
-appPath = os.path.abspath(os.path.dirname(os.path.join(sys.argv[0])))
+# appPath = os.path.abspath(os.path.dirname(os.path.join(sys.argv[0])))
+appPath = os.getcwd()
 inifile = os.path.join(appPath, "settings.ini")
 
 
-def createConfig():
+def create_config():
     """
     Create the configuration file
     """
@@ -21,17 +22,17 @@ def createConfig():
     config.write()
 
 
-def getConfig():
+def get_config():
     """
     Open the config file and return a configobj
     """
     if not os.path.exists(inifile):
         open(inifile, 'w').close()
-        createConfig()
+        create_config()
 
-    localDir = os.path.dirname(os.path.realpath(sys.argv[0]))
-    if not os.path.exists(localDir+'\\configspec.ini'):
-        conf_ini = file(localDir+'\\configspec.ini', 'w')
+    local_dir = os.path.dirname(os.path.realpath(sys.argv[0]))
+    if not os.path.exists(local_dir+'\\configspec.ini'):
+        conf_ini = file(local_dir+'\\configspec.ini', 'w')
         conf_ini.write("apikey = string(default='')\n")
         conf_ini.write("apisecret = string(default='')\n")
         conf_ini.write("tokenkey = string(default='')\n")
@@ -39,7 +40,7 @@ def getConfig():
         conf_ini.write("transitname = string(default='')\n")
         conf_ini.close()
 
-    config = configobj.ConfigObj(inifile, unrepr=True, configspec=localDir+'\\configspec.ini')
+    config = configobj.ConfigObj(inifile, unrepr=True, configspec=local_dir+'\\configspec.ini')
     validator = Validator()
     result = config.validate(validator)
     if result:
