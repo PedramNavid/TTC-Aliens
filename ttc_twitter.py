@@ -42,14 +42,14 @@ ALIEN_PHRASES = ['due to aliens.',
 
 def init_logging():
     logging.basicConfig(
-        level=logging.DEBUG,
+        level=logging.INFO,
         filename='log.txt',
         filemode='w',
         format='%(asctime)s %(levelname)s %(message)s',
         datefmt='%H:%M:%S',)
     if not hasattr(sys, 'frozen'):
         logger = logging.StreamHandler(sys.stderr)
-        logger.setLevel(logging.DEBUG)
+        logger.setLevel(logging.INFO)
         formatter = logging.Formatter(
             '%(asctime)s %(levelname)s %(message)s',
             '%H:%M:%S',)
@@ -148,10 +148,11 @@ class Bot():
             last_id = None
         try:
             result = self.interface.get_status(self.source_name, last_id)
-            transit_status, transit_id = result
-            logging.info('Got new status: ' + transit_status + ' WITH ID: ' + str(transit_id))
-            if transit_id != last_id:
-                pickle.dump(transit_id, open("lastid.p", "wb"))
+            if result:
+                transit_status, transit_id = result
+                logging.info('Got new status: ' + transit_status + ' WITH ID: ' + str(transit_id))
+                if transit_id != last_id:
+                    pickle.dump(transit_id, open("lastid.p", "wb"))
                 return transit_status
         except TwitterBotError as e:
             logging.error('Error reading latest status: ', e)
