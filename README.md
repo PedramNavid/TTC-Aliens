@@ -34,7 +34,9 @@ TODO
 2. Fix tweeting replies
 3. Fix calculation of odds (it's not mathematically ideal right now, resulting in less than the prescribed chance)
 4. Moar testing
-5...profit?
+5. GUI interface
+6. Service abilities
+7. profit?
 
 Known issues
 ------------
