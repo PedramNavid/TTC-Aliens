@@ -8,10 +8,12 @@ On the surface, it appears to reiterate the same tweets as a source account, in 
 However, occasionally it will change the cause of a delay or problem to something more alien or conspiracy related.
 
 **As an example**
+
 Source tweet:
-  511 Bathurst route turning back northbound via King, Spadina, Queen due to a collision on Bathurst at Front. #TTC
-Resulting tweet: 
-  511 Bathurst route turning back northbound via King, Spadina, Queen due to aliens.#TTC
+- 511 Bathurst route turning back northbound via King, Spadina, Queen due to a collision on Bathurst at Front. #TTC
+
+Resulting tweet:
+- 511 Bathurst route turning back northbound via King, Spadina, Queen due to aliens.#TTC
   
 
 Requirements
