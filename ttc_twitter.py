@@ -73,7 +73,8 @@ class TwitterInterface():
 
     def get_status(self, account_name, since=None):
         try:
-            statuses = self.api.GetUserTimeline(screen_name=account_name, since_id=since, count=1)
+            statuses = self.api.GetUserTimeline(screen_name=account_name, since_id=since, count=1,
+                                                exclude_replies=True)
             if statuses:
                 return statuses[0].text, statuses[0].id
         except requests.exceptions.ConnectionError as e:
@@ -103,14 +104,19 @@ class Bot():
         self.chance=chance
 
 
+    def qualify_phrase(self, text, sub):
+        """ Qualifies a phrase for alienification using a set of rules.
+        """
+
+        q1 = text.find(sub) != -1   # sub must be in text
+        q2 = text.find(sub) > 1     # sub must not be beginning of text
+        return q1 and q2
+
     @staticmethod
     def _strip_text(text, sub):
         """Strips part of a text if 'sub' is found, otherwise returns None
         """
         found = text.find(sub)
-        if found < 3:
-            # Ignore if sub is found at beginning of text, or not found at all
-            return None
         return text[0:found]
 
     @staticmethod
@@ -174,10 +180,9 @@ class Bot():
         """Randomly alienifies a text if a substring is found in the text. Max_length
         is 140 by default (twitter limit). Chance is odds of this happening is 2% (1/50).
         """
-        stripped = self._strip_text(text, self.substring)
-        phrase = None
-        if stripped: # returns None if substring not found
-            allowed_max = self.maxlength - (len(stripped) + len(self.hashtag))
+        if self.qualify_phrase(text, self.substring):
+            stripped = self._strip_text(text, self.substring)
+            allowed_max = self.maxlength - (len(stripped) + len(self.hashtag)) # TODO: Move this to qualify_phrase
             if allowed_max >= self._get_shortest_alien_phrase():
                 # Remove text, potentially add aliens
                 alien_random = random.randint(1, self.chance)
@@ -186,10 +191,9 @@ class Bot():
                     logging.debug('Looking for valid match for: ' + stripped)
                     try:
                         phrase = self._get_alien_text(allowed_max)
-                    except TwitterBotError:
-                        logging.warn('Tried to alienify but tweet was too long. Skipping this Alien instance.')
-                    if phrase:
                         return stripped + phrase + HASH_TAG
+                    except TwitterBotError:
+                        logging.warning('Tried to alienify but tweet was too long. Skipping this Alien instance.')
         return text
 
 
