@@ -117,7 +117,9 @@ class Bot():
         """Strips part of a text if 'sub' is found, otherwise returns None
         """
         found = text.find(sub)
-        return text[0:found]
+	if found > -1:
+	        return text[0:found]
+	return None
 
     @staticmethod
     def _get_shortest_alien_phrase():

@@ -24,14 +24,14 @@ due to power off at Wellesley.#TTC"
         my_string = "the substring is not found in this text"
         self.assertIsNone(self.bot._strip_text(my_string, self.substring))
 
-    def test_stripped_beginning(self):
+    def test_qualify_beginning(self):
         my_string = "Due to some garbage on tracks everything is broken. "
-        self.assertIsNone(self.bot._strip_text(my_string, self.substring))
+        self.assertFalse(self.bot.qualify_phrase(my_string, self.substring))
 
     def test_stripped_caps(self):
         # shouldn't occur but if it does let's ignore it.
         my_string = "There is a problem on the TTC Due to garbage."
-        self.assertIsNone(self.bot._strip_text(my_string, self.substring))
+        self.assertFalse(self.bot.qualify_phrase(my_string, self.substring))
 
     def test_get_alien_min_length(self):
         self.assertLess(self.bot._get_shortest_alien_phrase(), self.maxlength)
