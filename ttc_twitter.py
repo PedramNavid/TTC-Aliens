@@ -170,11 +170,14 @@ class Bot():
         """
         notice = self.get_latest()
         if notice:
-            logging.info('Posting Notice. Result: ' + notice)
+            logging.info('Attempting to post Notice: ' + notice)
             try:
                 self.interface.post_status(self.alienify(notice))
             except TwitterBotError as e:
                 logging.error('Error posting latest status: ', e )
+            except Twitter.TwitterError as e:
+                logging.error('Error posting latest status: ', e )
+
 
     def alienify(self, text):
         """Randomly alienifies a text if a substring is found in the text. Max_length
