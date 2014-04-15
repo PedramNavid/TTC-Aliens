@@ -16,7 +16,7 @@ TOKENKEY = config['tokenkey']
 TOKENSECRET = config['tokensecret']
 SOURCE_NAME = 'TTCNotices' # Get tweets from this account
 MAX_LENGTH = 140 # Used to determine acceptable alien phrases
-HASH_TAG = '#TTC' # appends to the end of every tweet. Counts toward length.
+HASH_TAG = ' #TTC' # appends to the end of every tweet. Counts toward length.
 SUBSTRING = "due to" # only tweets with this phrase are considered for alienification
 CHANCE = 30 # bigger number is less likely, odds are 1/CHANCE, so 50 = 2%, 100 = 1%.
 ALIEN_PHRASES = ['due to aliens.',
