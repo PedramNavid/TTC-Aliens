@@ -16,7 +16,7 @@ TOKENKEY = config['tokenkey']
 TOKENSECRET = config['tokensecret']
 SOURCE_NAME = 'TTCNotices' # Get tweets from this account
 MAX_LENGTH = 140 # Used to determine acceptable alien phrases
-HASH_TAG = ' #TTC' # appends to the end of every tweet. Counts toward length.
+HASH_TAG = '#TTC' # appends to the end of every tweet. Counts toward length.
 SUBSTRING = "due to" # only tweets with this phrase are considered for alienification
 CHANCE = 30 # bigger number is less likely, odds are 1/CHANCE, so 50 = 2%, 100 = 1%.
 ALIEN_PHRASES = ['due to aliens.',
@@ -24,18 +24,18 @@ ALIEN_PHRASES = ['due to aliens.',
                  'due to an alien abduction.',
                  'due to alien invasion.',
                  'due to poisonous Monsanto GMOs.',
-                 'due to chemtrail sprayer malfunction',
-                 'due to a decline in Spirograph activity',
-                 'due to Fukushima radiation',
-                 'due to extreme fluoridation',
-                 'due to fabricated fraud',
-                 'due to questionable birth certificates',
-                 'due to Rothschilds interference',
-                 'due to geoengineering',
-                 'due to HAARPA',
-                 'due to reptilians',
-                 'due to Russian interference',
-                 'due to vaccination attempts'
+                 'due to chemtrail sprayer malfunction.',
+                 'due to a decline in Spirograph activity.',
+                 'due to Fukushima radiation.',
+                 'due to extreme fluoridation.',
+                 'due to fabricated fraud.',
+                 'due to questionable birth certificates.',
+                 'due to Rothschilds interference.',
+                 'due to geoengineering.',
+                 'due to HAARPA.',
+                 'due to reptilians.',
+                 'due to Russian interference.',
+                 'due to vaccination attempts.'
 
 ]
 
